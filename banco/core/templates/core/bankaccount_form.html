@@ -1,0 +1,52 @@
+{% extends 'core/base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-light">
+        <h4 class="mb-0">{% if object %}Editar{% else %}Nova{% endif %} Conta Bancária</h4>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="{{ form.bank_name.id_for_label }}" class="form-label">
+                    {{ form.bank_name.label }}
+                    <small class="text-muted">Nome da instituição bancária</small>
+                </label>
+                {{ form.bank_name|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.account_number.id_for_label }}" class="form-label">
+                    {{ form.account_number.label }}
+                    <small class="text-muted">Número completo da conta com dígito</small>
+                </label>
+                {{ form.account_number|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.manager_name.id_for_label }}" class="form-label">
+                    {{ form.manager_name.label }}
+                    <small class="text-muted">Nome do gerente responsável pela conta</small>
+                </label>
+                {{ form.manager_name|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.manager_contact.id_for_label }}" class="form-label">
+                    {{ form.manager_contact.label }}
+                    <small class="text-muted">Telefone ou email do gerente</small>
+                </label>
+                {{ form.manager_contact|add_class:"form-control" }}
+            </div>
+
+            <div class="text-end">
+                <a href="{% url 'bankaccount-list' %}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
