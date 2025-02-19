@@ -1,9 +1,11 @@
 from django.db import models
 from django.db.models import Sum
+from django.contrib.auth.models import User
 
 # Create your models here.
 
 class BankAccount(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Usuário')
     bank_name = models.CharField('Nome do Banco', max_length=100)
     account_number = models.CharField('Número da Conta', max_length=20)
     manager_name = models.CharField('Nome do Gerente', max_length=100)

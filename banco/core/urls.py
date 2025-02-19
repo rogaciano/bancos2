@@ -11,4 +11,8 @@ urlpatterns = [
     path('accounts/<int:account_id>/transactions/create/', views.TransactionCreate.as_view(), name='transaction-create'),
     path('transactions/<int:pk>/update/', views.TransactionUpdate.as_view(), name='transaction-update'),
     path('transactions/<int:pk>/delete/', views.TransactionDelete.as_view(), name='transaction-delete'),
+    path('accounts/<int:account_id>/import-ofx/', views.import_ofx, name='import-ofx'),
+    path('accounts/<int:account_id>/transactions/delete-period/', 
+         views.DeleteTransactionsPeriod.as_view(), 
+         name='delete-transactions-period'),
 ]
