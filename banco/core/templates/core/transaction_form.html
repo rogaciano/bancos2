@@ -32,6 +32,7 @@
                                 </select>
                             </div>
                             <div class="col-md-8">
+                                
                                 <label for="{{ form.description.id_for_label }}" class="form-label">Descrição</label>
                                 {{ form.description.errors }}
                                 <input type="text" name="{{ form.description.name }}" class="form-control" id="{{ form.description.id_for_label }}" value="{{ form.description.value|default:'' }}" required>
@@ -39,7 +40,7 @@
                             <div class="col-md-4">
                                 <label for="{{ form.value.id_for_label }}" class="form-label">Valor</label>
                                 {{ form.value.errors }}
-                                <input type="number" name="{{ form.value.name }}" class="form-control" id="{{ form.value.id_for_label }}" step="0.01" value="{{ form.instance.value|default:'' }}" required>
+                                <input type="number" name="{{ form.value.name }}" class="form-control" id="{{ form.value.id_for_label }}" step="0.01" value="{{ form.value.value|default:'' }}" required>
                             </div>
                         </div>
                         <div class="mt-4">
