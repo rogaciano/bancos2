@@ -203,15 +203,16 @@ class TransactionUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self):
         transaction = self.get_object()
         return transaction.account.user == self.request.user
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['account_id'] = self.get_object().account.id
-        context['title'] = 'Editar Transação'
+        transaction = self.get_object()
+        context['account'] = transaction.account
         return context
-    
+
     def get_success_url(self):
-        return reverse_lazy('transaction-list', kwargs={'account_id': self.get_object().account.id})
+        transaction = self.get_object()
+        return reverse_lazy('transaction-list', kwargs={'account_id': transaction.account.id})
 
 class TransactionDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Transaction
