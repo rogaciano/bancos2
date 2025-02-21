@@ -118,7 +118,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+# Configuração para rodar em subdiretório
+FORCE_SCRIPT_NAME = '/bancosvestuar'
+STATIC_URL = '/bancosvestuar/static/'
+MEDIA_URL = '/bancosvestuar/media/'
 
 # Auth settings
 LOGIN_URL = 'login'

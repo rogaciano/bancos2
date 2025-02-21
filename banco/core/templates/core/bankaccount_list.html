@@ -1,96 +1,61 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
-<div class="card">
-    <div class="card-header bg-light d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">Contas Bancárias</h4>
-        <a href="{% url 'bankaccount-create' %}" class="btn btn-primary">
-            <i class="bi bi-plus"></i> Nova Conta
-        </a>
-    </div>
-    <div class="card-body">
-        <form method="get" class="mb-4">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <div class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="Pesquisar por banco, conta ou gerente..." value="{{ search }}">
-                        <button class="btn btn-outline-primary" type="submit">
-                            <i class="bi bi-search"></i>
-                        </button>
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Minhas Contas</h5>
+                        <a href="{% url 'bankaccount-create' %}" class="btn btn-light">
+                            <i class="fas fa-plus"></i> Nova Conta
+                        </a>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <select name="order" class="form-select" onchange="this.form.submit()">
-                        <option value="bank_name" {% if order == 'bank_name' %}selected{% endif %}>Banco (A-Z)</option>
-                        <option value="-bank_name" {% if order == '-bank_name' %}selected{% endif %}>Banco (Z-A)</option>
-                        <option value="account_number" {% if order == 'account_number' %}selected{% endif %}>Conta (A-Z)</option>
-                        <option value="-account_number" {% if order == '-account_number' %}selected{% endif %}>Conta (Z-A)</option>
-                        <option value="manager_name" {% if order == 'manager_name' %}selected{% endif %}>Gerente (A-Z)</option>
-                        <option value="-manager_name" {% if order == '-manager_name' %}selected{% endif %}>Gerente (Z-A)</option>
-                    </select>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Banco</th>
+                                    <th>Agência</th>
+                                    <th>Conta</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for account in object_list %}
+                                <tr>
+                                    <td>{{ account.name }}</td>
+                                    <td>{{ account.bank_name }}</td>
+                                    <td>{{ account.agency_number }}</td>
+                                    <td>{{ account.account_number }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'transaction-list' account.id %}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-list"></i> Extrato
+                                            </a>
+                                            <a href="{% url 'bankaccount-update' account.id %}" class="btn btn-sm btn-warning">
+                                                <i class="fas fa-edit"></i> Editar
+                                            </a>
+                                            <a href="{% url 'bankaccount-delete' account.id %}" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i> Excluir
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">Nenhuma conta cadastrada.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                {% if search %}
-                <div class="col-md-2">
-                    <a href="{% url 'bankaccount-list' %}" class="btn btn-outline-secondary w-100">
-                        <i class="bi bi-x-circle"></i> Limpar
-                    </a>
-                </div>
-                {% endif %}
             </div>
-        </form>
-
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Banco</th>
-                        <th>Conta</th>
-                        <th>Gerente</th>
-                        <th>Contato</th>
-                        <th>Saldo</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for account in accounts %}
-                    <tr>
-                        <td>{{ account.bank_name }}</td>
-                        <td>{{ account.account_number }}</td>
-                        <td>{{ account.manager_name }}</td>
-                        <td>{{ account.manager_contact }}</td>
-                        <td>R$ {{ account.get_balance|floatformat:2 }}</td>
-                        <td>
-                            <div class="btn-group">
-                                <a href="{% url 'transaction-list' account.id %}" class="btn btn-sm btn-primary">
-                                    <i class="bi bi-list"></i> Extrato
-                                </a>
-                                <a href="{% url 'bankaccount-update' account.id %}" class="btn btn-sm btn-warning">
-                                    <i class="bi bi-pencil"></i> Editar
-                                </a>
-                                <a href="{% url 'bankaccount-delete' account.id %}" class="btn btn-sm btn-danger">
-                                    <i class="bi bi-trash"></i> Excluir
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center">
-                            {% if search %}
-                            <div class="alert alert-warning mb-0">
-                                <i class="bi bi-exclamation-triangle"></i> Nenhuma conta encontrada com os critérios informados.
-                            </div>
-                            {% else %}
-                            <div class="alert alert-info mb-0">
-                                <i class="bi bi-info-circle"></i> Você ainda não possui contas cadastradas.
-                                <a href="{% url 'bankaccount-create' %}" class="alert-link">Clique aqui para cadastrar sua primeira conta</a>.
-                            </div>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
         </div>
     </div>
 </div>
