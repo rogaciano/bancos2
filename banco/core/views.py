@@ -174,16 +174,23 @@ class TransactionList(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
 class TransactionCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Transaction
+    fields = ['date', 'description', 'value', 'transaction_type']
     template_name = 'core/transaction_form.html'
-    fields = ['date', 'document', 'description', 'transaction_type', 'value']
-
+    
     def test_func(self):
-        self.account = get_object_or_404(BankAccount, id=self.kwargs.get('account_id'))
-        return self.account.user == self.request.user
+        account_id = self.kwargs.get('account_id')
+        account = get_object_or_404(BankAccount, id=account_id)
+        return account.user == self.request.user
 
     def form_valid(self, form):
         form.instance.account_id = self.kwargs.get('account_id')
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        account_id = self.kwargs.get('account_id')
+        context['account'] = get_object_or_404(BankAccount, id=account_id)
+        return context
 
     def get_success_url(self):
         return reverse_lazy('transaction-list', kwargs={'account_id': self.kwargs.get('account_id')})

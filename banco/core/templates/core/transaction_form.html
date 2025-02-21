@@ -1,52 +1,59 @@
 {% extends 'core/base.html' %}
-{% load widget_tweaks %}
 
 {% block content %}
-<div class="card">
-    <div class="card-header bg-light">
-        <h4 class="mb-0">{{ title|default:"Nova Transação" }}</h4>
-    </div>
-    <div class="card-body">
-        <form method="post">
-            {% csrf_token %}
-            
-            <div class="mb-3">
-                <label for="{{ form.date.id_for_label }}" class="form-label">
-                    {{ form.date.label }}
-                    <small class="text-muted">Data da transação</small>
-                </label>
-                {{ form.date|add_class:"form-control"|attr:"type:date" }}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Nova Transação - {{ account.name }}</h5>
+                        <a href="{% url 'transaction-list' account.id %}" class="btn btn-light">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.date.id_for_label }}" class="form-label">Data</label>
+                                {{ form.date.errors }}
+                                <input type="date" name="{{ form.date.name }}" class="form-control" id="{{ form.date.id_for_label }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.transaction_type.id_for_label }}" class="form-label">Tipo</label>
+                                {{ form.transaction_type.errors }}
+                                <select name="{{ form.transaction_type.name }}" class="form-select" id="{{ form.transaction_type.id_for_label }}" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="C">Crédito</option>
+                                    <option value="D">Débito</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">Descrição</label>
+                                {{ form.description.errors }}
+                                <input type="text" name="{{ form.description.name }}" class="form-control" id="{{ form.description.id_for_label }}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.value.id_for_label }}" class="form-label">Valor</label>
+                                {{ form.value.errors }}
+                                <input type="number" name="{{ form.value.name }}" class="form-control" id="{{ form.value.id_for_label }}" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Salvar
+                            </button>
+                            <a href="{% url 'transaction-list' account.id %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </div>
-
-            <div class="mb-3">
-                <label for="{{ form.description.id_for_label }}" class="form-label">
-                    {{ form.description.label }}
-                    <small class="text-muted">Descrição detalhada da transação</small>
-                </label>
-                {{ form.description|add_class:"form-control" }}
-            </div>
-
-            <div class="mb-3">
-                <label for="{{ form.transaction_type.id_for_label }}" class="form-label">
-                    {{ form.transaction_type.label }}
-                    <small class="text-muted">Tipo da transação</small>
-                </label>
-                {{ form.transaction_type|add_class:"form-select" }}
-            </div>
-
-            <div class="mb-3">
-                <label for="{{ form.value.id_for_label }}" class="form-label">
-                    {{ form.value.label }}
-                    <small class="text-muted">Valor da transação</small>
-                </label>
-                {{ form.value|add_class:"form-control" }}
-            </div>
-
-            <div class="d-flex justify-content-between">
-                <button type="submit" class="btn btn-primary">Salvar</button>
-                <a href="{% url 'transaction-list' account_id %}" class="btn btn-secondary">Cancelar</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 {% endblock %}
