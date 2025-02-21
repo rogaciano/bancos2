@@ -1,0 +1,31 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-danger text-white">
+        <h4 class="mb-0">Confirmar Exclusão</h4>
+    </div>
+    <div class="card-body">
+        <p class="lead">Você tem certeza que deseja excluir a conta bancária abaixo?</p>
+        
+        <div class="alert alert-warning">
+            <strong>{{ object.bank_name }}</strong> - Conta: {{ object.account_number }}
+        </div>
+
+        <p class="text-danger">
+            <i class="bi bi-exclamation-triangle"></i>
+            Esta ação não pode ser desfeita e todas as transações associadas serão excluídas.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="text-end">
+                <a href="{% url 'bankaccount-list' %}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Confirmar Exclusão
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

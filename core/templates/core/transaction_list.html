@@ -1,0 +1,228 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <h5 class="mb-0">Extrato - {{ account.name }}</h5>
+                            <small>Banco: {{ account.bank_name }} | Conta: {{ account.account_number }}</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'bankaccount-list' %}" class="btn btn-light">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
+                            <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                <i class="fas fa-trash-alt"></i> Excluir por Período
+                            </button>
+                            <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#importModal">
+                                <i class="fas fa-file-import"></i> Importar OFX
+                            </button>
+                            <a href="{% url 'transaction-create' account.id %}" class="btn btn-light">
+                                <i class="fas fa-plus"></i> Nova Transação
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Formulário de Busca -->
+                    <form method="get" class="mb-4" id="searchForm">
+                        <input type="hidden" name="order_by" value="{{ order_by }}">
+                        <input type="hidden" name="order_dir" value="{{ order_dir }}">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <input type="text" name="search" class="form-control" placeholder="Buscar..." value="{{ request.GET.search }}">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="date" name="start_date" class="form-control" placeholder="Data Inicial" value="{{ request.GET.start_date }}">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="date" name="end_date" class="form-control" placeholder="Data Final" value="{{ request.GET.end_date }}">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-search"></i> Filtrar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Tabela de Transações -->
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>
+                                        <a href="#" class="text-dark text-decoration-none" onclick="updateSort('date')">
+                                            Data
+                                            {% if order_by == 'date' %}
+                                                <i class="fas fa-sort-{{ order_dir }}"></i>
+                                            {% else %}
+                                                <i class="fas fa-sort text-muted"></i>
+                                            {% endif %}
+                                        </a>
+                                    </th>
+                                    <th>
+                                        <a href="#" class="text-dark text-decoration-none" onclick="updateSort('description')">
+                                            Descrição
+                                            {% if order_by == 'description' %}
+                                                <i class="fas fa-sort-{{ order_dir }}"></i>
+                                            {% else %}
+                                                <i class="fas fa-sort text-muted"></i>
+                                            {% endif %}
+                                        </a>
+                                    </th>
+                                    <th class="text-end">Crédito</th>
+                                    <th class="text-end">Débito</th>
+                                    <th class="text-end">
+                                        <a href="#" class="text-dark text-decoration-none" onclick="updateSort('value')">
+                                            Saldo
+                                            {% if order_by == 'value' %}
+                                                <i class="fas fa-sort-{{ order_dir }}"></i>
+                                            {% else %}
+                                                <i class="fas fa-sort text-muted"></i>
+                                            {% endif %}
+                                        </a>
+                                    </th>
+                                    <th class="text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in transactions %}
+                                <tr>
+                                    <td>{{ transaction.date|date:"d/m/Y" }}</td>
+                                    <td>{{ transaction.description }}</td>
+                                    <td class="text-end">
+                                        {% if transaction.transaction_type == 'C' %}
+                                            R$ {{ transaction.value|floatformat:2 }}
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        {% if transaction.transaction_type == 'D' %}
+                                            R$ {{ transaction.value|floatformat:2 }}
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end {% if transaction.running_balance < 0 %}text-danger{% endif %}">
+                                        R$ {{ transaction.running_balance|floatformat:2 }}
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{% url 'transaction-update' transaction.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'transaction-delete' transaction.id %}" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">Nenhuma transação encontrada.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr class="fw-bold">
+                                    <td colspan="2">Totais</td>
+                                    <td class="text-end text-success">R$ {{ total_credit|floatformat:2 }}</td>
+                                    <td class="text-end text-danger">R$ {{ total_debit|floatformat:2 }}</td>
+                                    <td class="text-end {% if balance < 0 %}text-danger{% else %}text-success{% endif %}">
+                                        R$ {{ balance|floatformat:2 }}
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Importação -->
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Importar Arquivo OFX</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'import-ofx' account.id %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="ofx_file" class="form-label">Selecione o arquivo OFX</label>
+                        <input type="file" class="form-control" id="ofx_file" name="ofx_file" accept=".ofx">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Importar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Exclusão por Período -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Excluir Transações por Período</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'delete-transactions-period' account.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Atenção!</strong> Esta ação excluirá todas as transações no período selecionado e não poderá ser desfeita.
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="start_date" class="form-label">Data Inicial</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="end_date" class="form-label">Data Final</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash-alt"></i> Excluir Transações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function updateSort(field) {
+    const form = document.getElementById('searchForm');
+    const currentOrderBy = form.querySelector('input[name="order_by"]').value;
+    const currentOrderDir = form.querySelector('input[name="order_dir"]').value;
+    
+    let newOrderDir = 'desc';
+    if (field === currentOrderBy) {
+        newOrderDir = currentOrderDir === 'desc' ? 'asc' : 'desc';
+    }
+    
+    form.querySelector('input[name="order_by"]').value = field;
+    form.querySelector('input[name="order_dir"]').value = newOrderDir;
+    form.submit();
+}
+</script>
+{% endblock %}
+{% endblock %}
