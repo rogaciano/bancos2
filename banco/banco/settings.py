@@ -125,7 +125,7 @@ MEDIA_URL = '/bancosvestuar/media/'
 
 # Auth settings
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'dashboard'
+LOGIN_REDIRECT_URL = 'bankaccount-list'
 LOGOUT_REDIRECT_URL = 'login'
 
 # Default primary key field type
