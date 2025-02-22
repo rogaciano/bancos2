@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import socket
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -118,10 +120,42 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-# Configuração para rodar em subdiretório
-FORCE_SCRIPT_NAME = '/bancosvestuar'
-STATIC_URL = '/bancosvestuar/static/'
-MEDIA_URL = '/bancosvestuar/media/'
+# Configuração para rodar em subdiretório ou na raiz
+# Verifica se está rodando no servidor de produção
+if socket.gethostname() == '144.202.29.245':  # Servidor de produção
+    # Configurações para produção
+    FORCE_SCRIPT_NAME = '/bancosvestuar'
+    STATIC_URL = '/bancosvestuar/static/'
+    MEDIA_URL = '/bancosvestuar/media/'
+    STATIC_ROOT = '/var/www/html/bancosvestuar/static/'
+    
+    # Configurações de segurança para produção
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+else:
+    # Configurações para desenvolvimento local
+    FORCE_SCRIPT_NAME = None
+    STATIC_URL = '/static/'
+    MEDIA_URL = '/media/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    
+    # Desabilitar todas as configurações de segurança em desenvolvimento
+    SECURE_SSL_REDIRECT = False
+    SECURE_PROXY_SSL_HEADER = None
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'core', 'static'),
+]
 
 # Auth settings
 LOGIN_URL = 'login'
