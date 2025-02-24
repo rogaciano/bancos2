@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import socket
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -47,8 +48,8 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -126,6 +127,7 @@ if socket.gethostname() == '144.202.29.245':  # Servidor de produção
     FORCE_SCRIPT_NAME = '/bancosvestuar'
     STATIC_URL = '/bancosvestuar/static/'
     MEDIA_URL = '/bancosvestuar/media/'
+    STATIC_ROOT = '/var/www/html/bancosvestuar/static/'
     
     # Configurações de segurança para produção
     SECURE_SSL_REDIRECT = True
@@ -135,11 +137,17 @@ if socket.gethostname() == '144.202.29.245':  # Servidor de produção
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    
+    # Configurações de domínio
+    CSRF_TRUSTED_ORIGINS = ['https://144.202.29.245']
+    CSRF_COOKIE_DOMAIN = '144.202.29.245'
+    SESSION_COOKIE_DOMAIN = '144.202.29.245'
 else:
     # Configurações para desenvolvimento local
     FORCE_SCRIPT_NAME = None
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     
     # Desabilitar todas as configurações de segurança em desenvolvimento
     SECURE_SSL_REDIRECT = False
@@ -149,11 +157,22 @@ else:
     SECURE_HSTS_SECONDS = 0
     SECURE_HSTS_INCLUDE_SUBDOMAINS = False
     SECURE_HSTS_PRELOAD = False
+    
+    # Configurações de domínio para desenvolvimento
+    CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000']
 
-# Auth settings
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'bankaccount-list'
-LOGOUT_REDIRECT_URL = 'login'
+# Configurações comuns de CSRF
+CSRF_USE_SESSIONS = True  # Armazena o token CSRF na sessão ao invés de cookie
+CSRF_COOKIE_HTTPONLY = True  # Previne acesso ao cookie via JavaScript
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'core', 'static'),
+]
+
+# Configurações de autenticação
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'  # Redireciona para a página inicial após o login
+LOGOUT_REDIRECT_URL = '/login/'  # Redireciona para a página de login após o logout
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
