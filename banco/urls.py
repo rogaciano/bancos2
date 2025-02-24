@@ -17,10 +17,21 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
+from core.views import (
+    BankAccountList, BankAccountCreate, BankAccountUpdate, BankAccountDelete,
+    TransactionList, TransactionCreate, TransactionUpdate, TransactionDelete,
+    DeleteTransactionsPeriod, dashboard, import_ofx,
+    UserList, UserCreate, UserUpdate, UserToggleStatus, CustomLogoutView
+)
 
 urlpatterns = [
+    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    path('logout/', CustomLogoutView.as_view(), name='logout'),
     path('admin/', admin.site.urls),
-    path('login/', auth_views.LoginView.as_view(), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+    # Usuários
+    path('users/', UserList.as_view(), name='user-list'),
+    path('users/create/', UserCreate.as_view(), name='user-create'),
+    path('users/<int:pk>/update/', UserUpdate.as_view(), name='user-update'),
+    path('users/<int:pk>/toggle-status/', UserToggleStatus.as_view(), name='user-toggle-status'),
     path('', include('core.urls')),
 ]

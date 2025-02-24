@@ -48,8 +48,8 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -121,7 +121,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 # Configuração para rodar em subdiretório ou na raiz
-# Verifica se está rodando no servidor de produção
 if socket.gethostname() == '144.202.29.245':  # Servidor de produção
     # Configurações para produção
     FORCE_SCRIPT_NAME = '/bancosvestuar'
@@ -137,6 +136,16 @@ if socket.gethostname() == '144.202.29.245':  # Servidor de produção
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    
+    # Configurações de domínio
+    CSRF_TRUSTED_ORIGINS = ['https://sistema9.com.br']
+    CSRF_COOKIE_DOMAIN = 'sistema9.com.br'
+    SESSION_COOKIE_DOMAIN = 'sistema9.com.br'
+    
+    # Configurações de autenticação para produção
+    LOGIN_URL = '/bancosvestuar/login/'
+    LOGIN_REDIRECT_URL = '/bancosvestuar/'
+    LOGOUT_REDIRECT_URL = '/bancosvestuar/login/'
 else:
     # Configurações para desenvolvimento local
     FORCE_SCRIPT_NAME = None
@@ -152,15 +161,22 @@ else:
     SECURE_HSTS_SECONDS = 0
     SECURE_HSTS_INCLUDE_SUBDOMAINS = False
     SECURE_HSTS_PRELOAD = False
+    
+    # Configurações de domínio para desenvolvimento
+    CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000']
+    
+    # Configurações de autenticação para desenvolvimento
+    LOGIN_URL = '/login/'
+    LOGIN_REDIRECT_URL = '/'
+    LOGOUT_REDIRECT_URL = '/login/'
+
+# Configurações comuns de CSRF
+CSRF_USE_SESSIONS = True
+CSRF_COOKIE_HTTPONLY = True
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'core', 'static'),
 ]
-
-# Auth settings
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'bankaccount-list'
-LOGOUT_REDIRECT_URL = 'login'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

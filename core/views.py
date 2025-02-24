@@ -6,7 +6,11 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, View
+from django.contrib.auth.views import LogoutView
 from django.db.models import Q, Sum
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+from django import forms
 
 from .models import BankAccount, Transaction
 
@@ -425,3 +429,70 @@ def import_ofx(request, account_id):
             messages.error(request, f'Erro ao processar o arquivo OFX: {str(e)}')
             
     return redirect('transaction-list', account_id=account.id)
+
+class UserList(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = User
+    template_name = 'core/user_list.html'
+    ordering = ['username']
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+class UserCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    model = User
+    template_name = 'core/user_form.html'
+    form_class = UserCreationForm
+    success_url = reverse_lazy('user-list')
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['first_name'] = forms.CharField(max_length=150, required=True, label='Nome')
+        form.fields['last_name'] = forms.CharField(max_length=150, required=True, label='Sobrenome')
+        form.fields['email'] = forms.EmailField(required=True, label='E-mail')
+        return form
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Usuário criado com sucesso!')
+        return super().form_valid(form)
+
+class UserUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = User
+    template_name = 'core/user_form.html'
+    fields = ['username', 'first_name', 'last_name', 'email']
+    success_url = reverse_lazy('user-list')
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Usuário atualizado com sucesso!')
+        return super().form_valid(form)
+
+class UserToggleStatus(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        return self.request.user.is_superuser
+
+    def get(self, request, pk):
+        user = get_object_or_404(User, pk=pk)
+        if user == request.user:
+            messages.error(request, 'Você não pode desativar seu próprio usuário!')
+            return redirect('user-list')
+        
+        user.is_active = not user.is_active
+        user.save()
+        
+        status = 'ativado' if user.is_active else 'desativado'
+        messages.success(request, f'Usuário {user.username} {status} com sucesso!')
+        
+        return redirect('user-list')
+
+class CustomLogoutView(LogoutView):
+    http_method_names = ['get', 'post']
+    template_name = 'registration/login.html'
+    
+    def dispatch(self, request, *args, **kwargs):
+        messages.success(request, 'Você foi desconectado com sucesso!')
+        return super().dispatch(request, *args, **kwargs)
